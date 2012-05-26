@@ -1,7 +1,7 @@
 #!/usr/bin/make -f 
 
 CC = gcc
-CFLAGS += -fexceptions -std=gnu++0x -fpermissive -DUNICODE
+CFLAGS += -lstdc++ -fexceptions -std=gnu++0x -fpermissive -DUNICODE -I.
 
 #CC = clang
 #CFLAGS += -fexceptions -fdiagnostics-fixit-info -std=gnu++0x
@@ -19,4 +19,7 @@ PFCOBJS = pfc/base64.o pfc/guid.o pfc/pathUtils.o pfc/profiler.o pfc/sort.o pfc/
 
 pfc/pfc.a: $(PFCOBJS)
 	ar -rcs $@ $^
+
+pfc/test/test: pfc/test/test.cpp pfc/pfc.a
+	$(CC) $^ -o $@ $(CFLAGS)
 
