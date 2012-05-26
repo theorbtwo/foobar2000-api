@@ -39,7 +39,7 @@ unsigned GUID_from_text::read_dword(const char * ptr)
 	return (read_word(ptr)<<16) | read_word(ptr+4);
 }
 
-void GUID_from_text::read_bytes(BYTE * out,unsigned num,const char * ptr)
+void GUID_from_text::read_bytes(unsigned char * out,unsigned num,const char * ptr)
 {
 	for(;num;num--)
 	{

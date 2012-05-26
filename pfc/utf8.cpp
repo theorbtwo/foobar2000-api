@@ -261,10 +261,10 @@ bool is_lower_ascii(const char * param)
 
 static bool check_end_of_string(const char * ptr)
 {
-	__try {
+        try {
 		return !*ptr;
 	}
-	__except(1) {return true;}
+	catch(...) {return true;}
 }
 
 unsigned strcpy_utf8_truncate(const char * src,char * out,unsigned maxbytes)
@@ -275,14 +275,14 @@ unsigned strcpy_utf8_truncate(const char * src,char * out,unsigned maxbytes)
 		maxbytes--;//for null
 		while(!check_end_of_string(src) && maxbytes>0)
 		{
-			__try {
+			try {
 				t_size delta = utf8_char_len(src);
 				if (delta>maxbytes || delta==0) break;
 				do 
 				{
 					out[ptr++] = *(src++);
 				} while(--delta);
-			} __except(1) { break; }
+			} catch(...) { break; }
 			rv = ptr;
 		}
 		out[rv]=0;

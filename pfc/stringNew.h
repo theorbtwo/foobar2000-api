@@ -19,15 +19,15 @@ namespace pfc {
 	class string {
 	public:
 		typedef rcptr_t<string_base const> t_data;
-		typedef rcptr_t<pfc::string8> t_dataImpl;
+		typedef rcptr_t<string8> t_dataImpl;
 		
 		string() : m_content(rcnew_t<__stringEmpty>()) {}
 		string(const char * p_source) : m_content(rcnew_t<string8>(p_source)) {}
-		string(const char * p_source, t_size p_sourceLen) : m_content(rcnew_t<pfc::string8>(p_source,p_sourceLen)) {}
+		string(const char * p_source, t_size p_sourceLen) : m_content(rcnew_t<string8>(p_source,p_sourceLen)) {}
 		string(char * p_source) : m_content(rcnew_t<string8>(p_source)) {}
-		string(char * p_source, t_size p_sourceLen) : m_content(rcnew_t<pfc::string8>(p_source,p_sourceLen)) {}
+		string(char * p_source, t_size p_sourceLen) : m_content(rcnew_t<string8>(p_source,p_sourceLen)) {}
 		string(t_data const & p_source) : m_content(p_source) {}
-		string(string_part_ref source) : m_content(rcnew_t<pfc::string8>(source)) {}
+		string(string_part_ref source) : m_content(rcnew_t<string8>(source)) {}
 		template<typename TSource> string(const TSource & p_source);
 
 		string const & toString() const {return *this;}
@@ -66,12 +66,12 @@ namespace pfc {
 		}
 
 		string toLower() const {
-			pfc::string8_fastalloc temp; temp.prealloc(128);
+			string8_fastalloc temp; temp.prealloc(128);
 			stringToLowerAppend(temp,ptr(),~0);
 			return string(temp.get_ptr());
 		}
 		string toUpper() const {
-			pfc::string8_fastalloc temp; temp.prealloc(128);
+			string8_fastalloc temp; temp.prealloc(128);
 			stringToUpperAppend(temp,ptr(),~0);
 			return string(temp.get_ptr());
 		}
@@ -135,7 +135,7 @@ namespace pfc {
 		protected:
 			template<typename T> static const char * myStringToPtr(const T& val) {return stringToPtr(val);}
 			static const char * myStringToPtr(string_part_ref) {
-				PFC_ASSERT(!"Should never get here"); throw pfc::exception_invalid_params();
+				PFC_ASSERT(!"Should never get here"); throw exception_invalid_params();
 			}
 		};
 
@@ -217,7 +217,7 @@ namespace pfc {
 	public:
 		stringp(const char * ptr) : m_ptr(ptr) {}
 		stringp(pfc::string const &s) : m_ptr(s.ptr()), m_s(s._content()) {}
-		stringp(pfc::string_base const &s) : m_ptr(s.get_ptr()) {}
+		stringp(string_base const &s) : m_ptr(s.get_ptr()) {}
 		template<typename TWhat> stringp(const TWhat& in) : m_ptr(in.toString()) {}
 
 		operator const char*() const {return m_ptr;}

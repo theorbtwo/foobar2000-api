@@ -171,4 +171,4 @@ private:
 
 typedef service_factory_single_transparent_t<config_object_notify_impl_simple> config_object_notify_simple_factory;
 
-#endif _CONFIG_OBJECT_IMPL_H_
+#endif //_CONFIG_OBJECT_IMPL_H_

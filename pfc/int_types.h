@@ -75,7 +75,7 @@ inline t_size MulDiv_Size(t_size x,t_size y,t_size z) {return (t_size) ( ((t_uin
 #elif defined(_WIN64)
 inline t_size MulDiv_Size(t_size x,t_size y,t_size z) {return (x*y)/z;}
 #else
-#error portme
+inline t_size MulDiv_Size(t_size x,t_size y,t_size z) {return (t_size) ( ((t_uint64)x * (t_uint64)y) / (t_uint64)z );}
 #endif
 
 #define pfc_infinite (~0)

@@ -1,6 +1,8 @@
 #include "pfc.h"
 
+#if _WINDOWS
 #include <intrin.h>
+#endif
 
 namespace pfc {
 	bool permutation_is_valid(t_size const * order, t_size count) {

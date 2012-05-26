@@ -4,19 +4,103 @@
 #include "../../pfc/pfc.h"
 #include <signal.h>
 
-#ifndef WIN32
-#error N/A
-#endif
-
 #ifndef STRICT
 #define STRICT
 #endif
 
+#ifdef WIN32
 #include <windows.h>
 #include <ddeml.h>
 #include <commctrl.h>
 #include <uxtheme.h>
 #include <tmschema.h>
+#else /* !WIN32 */
+
+typedef long* LRESULT;
+typedef bool BOOL;
+
+typedef void *HANDLE;
+typedef HANDLE HINSTANCE;
+typedef HANDLE HWND;
+typedef HANDLE HMENU;
+typedef HANDLE HMODULE;
+typedef HANDLE HDROP;
+typedef HANDLE HDC;
+typedef HANDLE HFONT;
+typedef HANDLE HCURSOR;
+typedef HANDLE HICON;
+typedef HANDLE HDDEDATA;
+typedef HANDLE HCONV;
+typedef HANDLE HIMAGELIST;
+typedef HANDLE HRSRC;
+
+/* treeview bits */
+typedef struct {} TVINSERTSTRUCTA;
+typedef HANDLE HTREEITEM;
+
+/* tab control bits */
+typedef struct {} TCITEMA;
+
+typedef struct _EXCEPTION_POINTERS {
+} EXCEPTION_POINTERS, *PEXCEPTION_POINTERS, *LPEXCEPTION_POINTERS;
+
+typedef long COLORREF;
+
+typedef char* HSZ;
+
+typedef uint32_t DWORD;
+typedef DWORD *LPDWORD;
+typedef unsigned int UINT;
+typedef long WPARAM;
+typedef long LPARAM;
+typedef UINT* UINT_PTR;
+typedef long LONG;
+typedef void *LPVOID;
+typedef unsigned long ULONG;
+typedef ULONG* ULONG_PTR;
+typedef uint16_t WORD;
+
+struct security_attributes;
+typedef struct security_attributes *LPSECURITY_ATTRIBUTES;
+
+struct size;
+typedef struct size *LPSIZE;
+
+struct rect;
+typedef struct rect RECT;
+
+typedef time_t FILETIME;
+
+// http://msdn.microsoft.com/en-us/library/windows/desktop/ms648742(v=vs.85).aspx
+#define __in
+typedef HDDEDATA CALLBACK *(PFNCALLBACK)(
+                                         __in  UINT uType,
+                                         __in  UINT uFmt,
+                                         __in  HCONV hconv,
+                                         __in  HSZ hsz1,
+                                         __in  HSZ hsz2,
+                                         __in  HDDEDATA hdata,
+                                         __in  ULONG_PTR dwData1,
+                                         __in  ULONG_PTR dwData2
+                                         );
+
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#define FILE_ATTRIBUTE_DIRECTORY S_IFDIR
+
+#define LANG_NEUTRAL 0
+#define SUBLANG_NEUTRAL 0
+#define MAKELANGID(lang, sublang) ((lang) | (sublang)<<8)
+
+typedef wchar_t TCHAR;
+
+/* Thready bits */
+#include <semaphore.h>
+typedef sem_t CRITICAL_SECTION;
+
+#endif
 
 #ifndef NOTHROW
 #ifdef _MSC_VER
@@ -26,12 +110,26 @@
 #endif
 #endif
 
+#ifdef _MSC_VER
 #define SHARED_API /*NOTHROW*/ __stdcall
+#else
+#define SHARED_API
+#endif
 
+#ifdef WIN32
 #ifndef SHARED_EXPORTS
 #define SHARED_EXPORT __declspec(dllimport) SHARED_API
 #else
 #define SHARED_EXPORT __declspec(dllexport) SHARED_API
+#endif
+#else /*!WIN32*/
+
+#ifndef SHARED_EXPORTS
+#define SHARED_EXPORT SHARED_API
+#else
+#define SHARED_EXPORT SHARED_API
+#endif
+
 #endif
 
 extern "C" {
@@ -287,6 +385,8 @@ static pfc::string uGetDlgItemText(HWND wnd,UINT id) {
 
 #define uMAKEINTRESOURCE(x) ((const char*)LOWORD(x))
 
+#ifdef _WINDOWS
+
 #ifdef _DEBUG
 class critical_section {
 private:
@@ -319,6 +419,57 @@ private:
 	const critical_section & operator=(const critical_section &) {throw pfc::exception_not_implemented();}
 };
 #endif
+
+#else /* !_WINDOWS */
+class critical_section {
+ private:
+  // 1=unlocked, 0=locked
+  sem_t sem;
+  int count;
+ public:
+  int enter() {
+    sem_wait(&sem);
+    return ++count;
+  }
+
+  int leave() {
+    int rv = --count;
+    sem_post(&sem);
+    return count;
+  }
+
+  int get_lock_count() {
+    return count;
+  }
+
+  int get_lock_count_check() {
+    enter();
+    return leave();
+  }
+
+  inline void assert_locked() {
+    assert(get_lock_count_check() > 0);
+  }
+
+  inline void assert_not_locked() {
+    assert(get_lock_count_check() == 0);
+  }
+
+  critical_section() {
+    sem_init(&sem, 0, 1);
+  }
+  
+  ~critical_section() {
+    sem_destroy(&sem);
+  }
+
+ private:
+  critical_section(const critical_section&) {throw pfc::exception_not_implemented();}
+  const critical_section & operator=(const critical_section &) {throw pfc::exception_not_implemented();}
+  
+};
+#endif
+
 class c_insync
 {
 private:
@@ -331,7 +482,7 @@ public:
 
 #define insync(X) c_insync blah____sync(X)
 
-
+#ifdef _WINDOWS
 class critical_section2	//smarter version, has try_enter()
 {
 private:
@@ -361,6 +512,46 @@ public:
 	inline void assert_not_locked() {assert(get_lock_count_check()==0);}
 
 };
+#else /* !_WINDOWS */
+
+#define INFINITE (DWORD)~0;
+
+class critical_section2	//smarter version, has try_enter()
+{
+private:
+	sem_t semaphore;
+	int count;
+public:
+	int enter() {return enter_timeout(INFINITE);}
+	int leave() {int rv = --count;sem_post(&semaphore);return rv;}
+	int get_lock_count() {return count;}
+	int get_lock_count_check()
+	{
+		int val = try_enter();
+		if (val>0) val = leave();
+		return val;
+	}
+	int enter_timeout(DWORD t) {
+          /* t is in miliseconds */
+          struct timespec ts;
+          ts.tv_sec = t/1000;
+          ts.tv_nsec = (t%1000) * 1000000;
+          return WaitForSingleObject(hMutex,t)==WAIT_OBJECT_0 ? ++count : 0;
+        }
+	int try_enter() {return enter_timeout(0);}
+	int check_count() {enter();return leave();}
+	critical_section2();
+	{
+		hMutex = uCreateMutex(0,0,0);
+		count=0;
+	}
+	~critical_section2() {CloseHandle(hMutex);}
+
+	inline void assert_locked() {assert(get_lock_count_check()>0);}
+	inline void assert_not_locked() {assert(get_lock_count_check()==0);}
+
+};
+#endif
 
 class c_insync2
 {

@@ -120,7 +120,8 @@ void sort_void_ex (
     int (*comp)(const void *, const void *),
 	void (*swap)(void *, void *, t_size) )
 {
-	sort(sort_callback_impl_legacy(base,width,comp,swap),num);
+	sort_callback_impl_legacy impl = sort_callback_impl_legacy(base,width,comp,swap);
+	sort(impl, num);
 }
 
 static void squaresort(pfc::sort_callback & p_callback,t_size const p_base,t_size const p_count) {
@@ -147,14 +148,29 @@ static counter::t_val uniqueVal() {
 #endif
 
 static t_size myrand(t_size count) {
+#if RAND_MAX == 0x7FFF
 	PFC_STATIC_ASSERT( RAND_MAX == 0x7FFF );
 
 	t_uint64 val;
 	val = (t_uint64) rand() | (t_uint64)( (t_uint32)rand() << 16 );
+#else
+        // +1 because rand varies from 0 to RAND_MAX, for RAND_MAX+1
+        // possible values.
+        // I hope the compiler is smart enough to constant-fold this around...
+        int randbits = (int)floor(log2(RAND_MAX+1.0));
+        t_uint64 val;
+        int bits = 0;
+        while (bits < 64) {
+          val = val << bits;
+          val |= random();
+          bits += randbits;
+        }
+#endif
 
 	val ^= uniqueVal();
 
 	return (t_size)(val % count);
+        
 }
 
 inline static t_size __pivot_helper(pfc::sort_callback & p_callback,t_size const p_base,t_size const p_count) {
@@ -256,7 +272,8 @@ void sort_callback_stabilizer::swap(t_size p_index1, t_size p_index2)
 
 void sort_stable(sort_callback & p_callback,t_size p_count)
 {
-	sort(sort_callback_stabilizer(p_callback,p_count),p_count);
+	sort_callback_stabilizer stabilizer = sort_callback_stabilizer(p_callback,p_count);
+	sort(stabilizer,p_count);
 }
 
 }

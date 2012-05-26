@@ -43,6 +43,9 @@ inline bool operator!=(REFGUID guidOne, REFGUID guidOther) {return !__InlineIsEq
 #elif defined(__GNUC__) && (defined __unix__ || defined __POSIX__)
 #include <stdint.h>
 #include <memory.h>
+#include <stdarg.h>
+#include <wctype.h>
+
 typedef struct {
         uint32_t Data1;
         uint16_t Data2;
@@ -127,10 +130,10 @@ namespace pfc { void myassert(const wchar_t * _Message, const wchar_t *_File, un
 #else
 
 #define NOVTABLE
-#define ASSUME(X) PFC_ASSERT(X)
-#define PFC_DEPRECATE(X)
-#define PFC_NORETURN
-#define PFC_NOINLINE
+#define ASSUME(X) __builtin_expect(!X, 0); PFC_ASSERT(X)
+#define PFC_DEPRECATE(X) __attribute__((deprecated))
+#define PFC_NORETURN __attribute__((noreturn))
+#define PFC_NOINLINE __attribute__((noinline))
 
 #endif
 
@@ -145,21 +148,21 @@ namespace pfc { void myassert(const wchar_t * _Message, const wchar_t *_File, un
 #include "bsearch_inline.h"
 #include "bsearch.h"
 #include "sort.h"
+#include "ref_counter.h"
+#include "iterators.h"
+#include "chain_list_v2.h"
+#include "avltree.h"
+#include "map.h"
 #include "order_helper.h"
 #include "list.h"
 #include "ptr_list.h"
 #include "string.h"
 #include "string_list.h"
-#include "ref_counter.h"
-#include "iterators.h"
-#include "avltree.h"
-#include "map.h"
 #include "bit_array_impl_part2.h"
 #include "profiler.h"
 #include "guid.h"
 #include "byte_order_helper.h"
 #include "other.h"
-#include "chain_list_v2.h"
 #include "rcptr.h"
 #include "com_ptr_t.h"
 #include "string_conv.h"

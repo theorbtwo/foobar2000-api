@@ -206,10 +206,11 @@ namespace pfc {
 		if (IsBigEndian) decode_big_endian(p_out,p_buffer);
 		else decode_little_endian(p_out,p_buffer);
 	}
+
 	template<bool IsBigEndian,typename TInt>
 	inline void encode_endian(t_uint8 * p_buffer,TInt p_in) {
-		if (IsBigEndian) encode_big_endian(p_in,p_value);
-		else encode_little_endian(p_in,p_value);
+                if (IsBigEndian) encode_big_endian(p_buffer, p_in);
+                else encode_little_endian(p_buffer, p_in);
 	}
 
 
@@ -220,8 +221,8 @@ namespace pfc {
 		reverse_bytes<width-2>(p_buffer+1);
 	}
 
-	template<> inline static void reverse_bytes<1>(t_uint8 * p_buffer) { }
-	template<> inline static void reverse_bytes<0>(t_uint8 * p_buffer) { }
+	template<> void reverse_bytes<1>(t_uint8 * p_buffer) { }
+	template<> void reverse_bytes<0>(t_uint8 * p_buffer) { }
 
 }
 

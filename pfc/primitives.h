@@ -70,7 +70,7 @@ namespace pfc {
 		}
 		char * m_message;
 	};
-	PFC_NORETURN template<typename t_exception> void throw_exception_with_message(const char * p_message) {
+	template<typename t_exception> PFC_NORETURN void throw_exception_with_message(const char * p_message) {
 		throw __exception_with_message_t<t_exception>(p_message);
 	}
 }
@@ -93,7 +93,7 @@ namespace pfc {
 	template<bool val> class static_assert_t;
 	template<> class static_assert_t<true> {};
 
-#define PFC_STATIC_ASSERT(X) { pfc::static_assert_t<(X)>(); }
+#define PFC_STATIC_ASSERT(X) { ::pfc::static_assert_t<(X)>(); }
 
 	template<typename t_type>
 	void assert_raw_type() {static_assert_t< !traits_t<t_type>::needs_constructor && !traits_t<t_type>::needs_destructor >();}
@@ -819,7 +819,8 @@ namespace pfc {
 
 #define PFC_CLASS_NOT_COPYABLE(THISCLASSNAME,THISTYPE) \
 	private:	\
-	THISCLASSNAME(const THISTYPE&) {throw pfc::exception_bug_check();}	\
-	const THISTYPE & operator=(const THISTYPE &) {throw pfc::exception_bug_check();}
+	THISCLASSNAME(const THISTYPE&) {throw exception_bug_check();}	\
+	const THISTYPE & operator=(const THISTYPE &) {throw exception_bug_check();}
 
 #define PFC_CLASS_NOT_COPYABLE_EX(THISTYPE) PFC_CLASS_NOT_COPYABLE(THISTYPE,THISTYPE)
+

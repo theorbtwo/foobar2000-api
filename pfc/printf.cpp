@@ -4,6 +4,59 @@
 
 #pragma warning(disable:4996)
 
+#ifndef _WINDOWS
+int _itoa_s(
+            int value,
+            char *buffer,
+            size_t sizeInCharacters,
+            int radix 
+            ) {
+  if (radix == 10) {
+    if (snprintf(buffer, sizeInCharacters, "%d", value)) {
+      return 0;
+    } else {
+      return errno;
+    }
+  } else if (radix == 16) {
+    if (snprintf(buffer, sizeInCharacters, "%x", value)) {
+      return 0;
+    } else {
+      return errno;
+    }
+  }
+}
+
+template <size_t size> int _itoa_s(int value, char (&buffer)[size], int radix) {
+  return _itoa_s(value, buffer, size, radix);
+}
+
+int _ultoa_s(
+             unsigned long value,
+             char *buffer,
+             size_t sizeInCharacters,
+             int radix 
+             ) {
+  if (radix == 10) {
+    if (snprintf(buffer, sizeInCharacters, "%d", value)) {
+      return 0;
+    } else {
+      return errno;
+    }
+  } else if (radix == 16) {
+    if (snprintf(buffer, sizeInCharacters, "%x", value)) {
+      return 0;
+    } else {
+      return errno;
+    }
+  }
+}
+
+template <size_t size> int _ultoa_s(int value, char (&buffer)[size], int radix) {
+  return _ultoa_s(value, buffer, size, radix);
+}
+
+#endif
+
 namespace pfc {
 
 void string_printf::run(const char * fmt,va_list list) {g_run(*this,fmt,list);}
@@ -93,7 +146,9 @@ void string_printf::g_run(string_base & out,const char * fmt,va_list list)
 				}
 				else if (*fmt=='c' || *fmt=='C')
 				{
-					out.add_char(va_arg(list,char));
+                                        /* int, not char, because argument
+                                           will be prompted. */
+                                        out.add_char(va_arg(list, int));
 					fmt++;
 				}
 			}

@@ -408,6 +408,9 @@ namespace pfc {
 
 #define PFC_DEPRECATE_PRINTF PFC_DEPRECATE("Use string8/string_fixed_t with operator<< overloads instead.")
 
+inline pfc::string_base & operator<<(pfc::string_base & p_fmt,const char * p_source) {p_fmt.add_string_(p_source); return p_fmt;}
+inline pfc::string_base & operator<<(pfc::string_base & p_fmt,pfc::string_part_ref source) {p_fmt.add_string(source.m_ptr, source.m_len); return p_fmt;}
+
 namespace pfc {
 
 	class string_buffer {
@@ -573,18 +576,18 @@ namespace pfc {
 	typedef string8_fastalloc string_formatter;
 
 	class format_hexdump_ex {
+	private:
+		string_formatter m_formatter;
 	public:
 		template<typename TWord> format_hexdump_ex(const TWord * buffer, t_size bufLen, const char * spacing = " ") {
 			for(t_size n = 0; n < bufLen; n++) {
-				if (n > 0 && spacing != NULL) m_formatter << spacing;
+                                if (n > 0 && spacing != NULL) m_formatter << spacing;
 				m_formatter << format_hex(buffer[n],sizeof(TWord) * 2);
 			}
 		}
 		inline const char * get_ptr() const {return m_formatter;}
 		inline operator const char * () const {return m_formatter;}
 		inline const char * toString() const {return m_formatter;}
-	private:
-		string_formatter m_formatter;
 	};
 
 	class format_hexdump
@@ -703,9 +706,10 @@ namespace pfc {
 
 }
 
-inline pfc::string_base & operator<<(pfc::string_base & p_fmt,const char * p_source) {p_fmt.add_string_(p_source); return p_fmt;}
-inline pfc::string_base & operator<<(pfc::string_base & p_fmt,pfc::string_part_ref source) {p_fmt.add_string(source.m_ptr, source.m_len); return p_fmt;}
+
+
 inline pfc::string_base & operator<<(pfc::string_base & p_fmt,t_int32 p_val) {p_fmt.add_string(pfc::format_int(p_val)); return p_fmt;}
+
 inline pfc::string_base & operator<<(pfc::string_base & p_fmt,t_uint32 p_val) {p_fmt.add_string(pfc::format_uint(p_val)); return p_fmt;}
 inline pfc::string_base & operator<<(pfc::string_base & p_fmt,t_int64 p_val) {p_fmt.add_string(pfc::format_int(p_val)); return p_fmt;}
 inline pfc::string_base & operator<<(pfc::string_base & p_fmt,t_uint64 p_val) {p_fmt.add_string(pfc::format_uint(p_val)); return p_fmt;}
@@ -802,7 +806,7 @@ namespace pfc {
 
 	template<typename t_source> static void stringCombine(pfc::string_base & out, t_source const & in, const char * separator, const char * separatorLast) {
 		out.reset();
-		for(t_source::const_iterator walk = in.first(); walk.is_valid(); ++walk) {
+		for(typename t_source::const_iterator walk = in.first(); walk.is_valid(); ++walk) {
 			if (!out.is_empty()) {
 				if (walk == in.last()) out << separatorLast;
 				else out << separator;

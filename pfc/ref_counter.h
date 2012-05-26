@@ -1,3 +1,7 @@
+#ifndef _WINDOWS
+#include <atomic>
+#endif
+
 namespace pfc {
 	class counter {
 	public:
@@ -7,17 +11,20 @@ namespace pfc {
 		long operator--() throw() {return InterlockedDecrement(&m_val);}
 		long operator++(int) throw() {return InterlockedIncrement(&m_val)-1;}
 		long operator--(int) throw() {return InterlockedDecrement(&m_val)+1;}
-#else
-		long operator++() {return ++m_val;}
-		long operator--() {return --m_val;}
-		long operator++(int) {return m_val++;}
-		long operator--(int) {return m_val--;}
-#pragma message("PORTME")
-#endif
 		operator long() const throw() {return m_val;}
 		typedef long t_val;
 	private:
 		volatile long m_val;
+#else
+		long operator++() {++m_val;}
+		long operator--() {--m_val;}
+		long operator++(int) {m_val++;}
+		long operator--(int) {m_val--;}
+		operator long() const throw() {return m_val;}
+		typedef long t_val;
+	private:
+                std::atomic<long> m_val;
+#endif
 	};
 
 	typedef counter refcounter;

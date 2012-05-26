@@ -11,10 +11,12 @@ namespace pfc {
 		}
 		if (ret == 0) return 1;
 		return ret;
-	}
 #else
-#error PORTME
+                /* This doesn't adjust for the process affinity mask,
+                   unlike the win32 version above... oh well? */
+                return sysconf(_SC_NPROCESSORS_ONLN);
 #endif
+	}
 
 	t_size getOptimalWorkerThreadCountEx(t_size taskCountLimit) {
 		if (taskCountLimit <= 1) return 1;

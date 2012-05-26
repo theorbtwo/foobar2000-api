@@ -121,22 +121,23 @@ char getDefaultSeparator() {
 #ifdef _WINDOWS
 	return '\\';
 #else
-#error PORTME
+        '/'
 #endif
+          ;
 }
 
 static const string g_illegalNameChars(g_pathSeparators +
 #ifdef _WINDOWS
 									   ":<>*?\""
 #else
-#error PORTME
+                                       ""
 #endif
 									   );
 static const string g_illegalNameChars_noWC(g_pathSeparators +
 #ifdef _WINDOWS
 									   ":<>?\""
 #else
-#error PORTME
+                                            ""
 #endif
 									   );
 string getIllegalNameChars(bool allowWC) {

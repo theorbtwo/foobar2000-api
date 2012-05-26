@@ -177,7 +177,7 @@ private:
 
 template<typename T>
 class NOVTABLE list_base_t : public list_base_const_t<T> {
-private:
+protected:
 	typedef list_base_t<T> t_self;
 	typedef const list_base_const_t<T> t_self_const;
 public:
@@ -300,6 +300,9 @@ protected:
 template<typename T,typename t_storage>
 class list_impl_t : public list_base_t<T>
 {
+protected:
+	typedef list_base_t<T> t_self;
+	typedef const list_base_const_t<T> t_self_const;
 public:
 	list_impl_t() {}
 	list_impl_t(const list_impl_t<T,t_storage> & p_source) { *this = p_source; }
@@ -557,7 +560,12 @@ public:
 	template<typename t_search>
 	inline bool have_item(const t_search & p_item) const {return this->template find_item<t_search>(p_item)!=~0;}
 
-	template<typename t_in> t_self & operator=(t_in const & source) {remove_all(); add_items(source); return *this;}
+        template<typename t_in> t_self & operator=(t_in const & source) {
+          remove_all();
+          add_items(source);
+          return *this;
+        }
+
 	template<typename t_in> t_self & operator+=(t_in const & p_source) {add_item(p_source); return *this;}
 	template<typename t_in> t_self & operator|=(t_in const & p_source) {add_items(p_source); return *this;}
 protected:
@@ -566,14 +574,25 @@ protected:
 
 template<typename t_item, template<typename> class t_alloc = pfc::alloc_fast >
 class list_t : public list_impl_t<t_item,pfc::array_t<t_item,t_alloc> > { 
+protected:
+	typedef list_base_t<t_item> t_self;
+	typedef const list_base_const_t<t_item> t_self_const;
 public:
-	template<typename t_in> t_self & operator=(t_in const & source) {remove_all(); add_items(source); return *this;}
+	template<typename t_in> t_self & operator=(t_in const & source) {
+          remove_all();
+          add_items(source);
+          return *this;
+        }
+
 	template<typename t_in> t_self & operator+=(t_in const & p_source) {add_item(p_source); return *this;}
 	template<typename t_in> t_self & operator|=(t_in const & p_source) {add_items(p_source); return *this;}
 };
 
 template<typename t_item, t_size p_fixed_count, template<typename> class t_alloc = pfc::alloc_fast >
 class list_hybrid_t : public list_impl_t<t_item,pfc::array_hybrid_t<t_item,p_fixed_count,t_alloc> > {
+protected:
+	typedef list_base_t<t_item> t_self;
+	typedef const list_base_const_t<t_item> t_self_const;
 public:
 	template<typename t_in> t_self & operator=(t_in const & source) {remove_all(); add_items(source); return *this;}
 	template<typename t_in> t_self & operator+=(t_in const & p_source) {add_item(p_source); return *this;}

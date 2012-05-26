@@ -66,7 +66,7 @@ bool is_path_bad_char(unsigned c)
 #ifdef _WINDOWS
 	return c=='\\' || c=='/' || c=='|' || c==':' || c=='*' || c=='?' || c=='\"' || c=='>' || c=='<';
 #else
-#error portme
+        return c=='/';
 #endif
 }
 
@@ -311,7 +311,7 @@ unsigned atoui_ex(const char * p_string,t_size p_string_len)
 	return ret;
 }
 
-int strcmp_ex(const char* p1,t_size n1,const char* p2,t_size n2)
+int strcmp_ex(const char* p1,t_size n1,const char* p2,t_size n2) throw()
 {
 	t_size idx = 0;
 	n1 = strlen_max(p1,n1); n2 = strlen_max(p2,n2);
