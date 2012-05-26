@@ -37,11 +37,17 @@ namespace pfc {
 
 #else
 
-#define PFC_DECLARE_EXCEPTION(NAME,BASECLASS,DEFAULTMSG)	\
-class NAME : public BASECLASS { \
-public:	\
-	static const char * g_what() {return DEFAULTMSG;}	\
-	const char* what() const throw() {return DEFAULTMSG;}	\
+#define PFC_DECLARE_EXCEPTION(NAME,BASECLASS,DEFAULTMSG)		\
+  class NAME : public BASECLASS {                                       \
+public:									\
+	static const char * g_what() {return DEFAULTMSG;}		\
+	const char* what() const throw() {return m_msg ? m_msg : DEFAULTMSG;} \
+        NAME() {m_msg = NULL;}						\
+	NAME(const char * p_msg) {m_msg = p_msg;}                       \
+	NAME(const char * p_msg,int) {m_msg = p_msg;}                   \
+	NAME(const NAME & p_source) {m_msg = (const char *)p_source.what();} \
+private: \
+	const char *m_msg; \
 };
 
 namespace pfc {

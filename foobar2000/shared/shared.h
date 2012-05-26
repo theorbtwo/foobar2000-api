@@ -16,37 +16,14 @@
 #include <tmschema.h>
 #else /* !WIN32 */
 
+#define TRUE !0
+#define FALSE 0
+
 typedef long* LRESULT;
 typedef bool BOOL;
 
-typedef void *HANDLE;
-typedef HANDLE HINSTANCE;
-typedef HANDLE HWND;
-typedef HANDLE HMENU;
-typedef HANDLE HMODULE;
-typedef HANDLE HDROP;
-typedef HANDLE HDC;
-typedef HANDLE HFONT;
-typedef HANDLE HCURSOR;
-typedef HANDLE HICON;
-typedef HANDLE HDDEDATA;
-typedef HANDLE HCONV;
-typedef HANDLE HIMAGELIST;
-typedef HANDLE HRSRC;
-
-/* treeview bits */
-typedef struct {} TVINSERTSTRUCTA;
-typedef HANDLE HTREEITEM;
-
-/* tab control bits */
-typedef struct {} TCITEMA;
-
-typedef struct _EXCEPTION_POINTERS {
-} EXCEPTION_POINTERS, *PEXCEPTION_POINTERS, *LPEXCEPTION_POINTERS;
-
-typedef long COLORREF;
-
 typedef char* HSZ;
+typedef char* LPCSTR;
 
 typedef uint32_t DWORD;
 typedef DWORD *LPDWORD;
@@ -71,6 +48,24 @@ typedef struct rect RECT;
 
 typedef time_t FILETIME;
 
+typedef int HRESULT;
+
+typedef void *HANDLE;
+typedef HANDLE HINSTANCE;
+typedef HANDLE HWND;
+typedef HANDLE HMENU;
+typedef HANDLE HMODULE;
+typedef HANDLE HDROP;
+typedef HANDLE HDC;
+typedef HANDLE HFONT;
+typedef HANDLE HCURSOR;
+typedef HANDLE HICON;
+typedef HANDLE HDDEDATA;
+typedef HANDLE HCONV;
+typedef HANDLE HIMAGELIST;
+typedef HANDLE HRSRC;
+typedef HANDLE HGLOBAL;
+
 // http://msdn.microsoft.com/en-us/library/windows/desktop/ms648742(v=vs.85).aspx
 #define __in
 typedef HDDEDATA CALLBACK *(PFNCALLBACK)(
@@ -83,6 +78,38 @@ typedef HDDEDATA CALLBACK *(PFNCALLBACK)(
                                          __in  ULONG_PTR dwData1,
                                          __in  ULONG_PTR dwData2
                                          );
+
+/*  GUI things */
+
+/* http://msdn.microsoft.com/en-us/library/dd162805(v=vs.85).aspx */
+typedef struct tagPOINT {
+  LONG x;
+  LONG y;
+} POINT, *PPOINT;
+
+
+/* fonty things */
+
+/* http://msdn.microsoft.com/en-us/library/dd145037(v=vs.85).aspx */
+typedef struct tagLOGFONT {
+} LOGFONT, *PLOGFONT;
+
+/* FIXME: reconsider when we figure out what else
+   t_font_description::g_from_system is supposed to take? */
+#define TMT_MENUFONT 1 
+
+/* treeview bits */
+typedef struct {} TVINSERTSTRUCTA;
+typedef HANDLE HTREEITEM;
+
+/* tab control bits */
+typedef struct {} TCITEMA;
+
+typedef struct _EXCEPTION_POINTERS {
+} EXCEPTION_POINTERS, *PEXCEPTION_POINTERS, *LPEXCEPTION_POINTERS;
+
+typedef long COLORREF;
+
 
 
 #include <sys/types.h>
@@ -514,7 +541,7 @@ public:
 };
 #else /* !_WINDOWS */
 
-#define INFINITE (DWORD)~0;
+#define INFINITE (DWORD)~0
 
 class critical_section2	//smarter version, has try_enter()
 {
@@ -522,7 +549,7 @@ private:
 	sem_t semaphore;
 	int count;
 public:
-	int enter() {return enter_timeout(INFINITE);}
+        int enter() {return enter_timeout(INFINITE);};
 	int leave() {int rv = --count;sem_post(&semaphore);return rv;}
 	int get_lock_count() {return count;}
 	int get_lock_count_check()
@@ -536,16 +563,21 @@ public:
           struct timespec ts;
           ts.tv_sec = t/1000;
           ts.tv_nsec = (t%1000) * 1000000;
-          return WaitForSingleObject(hMutex,t)==WAIT_OBJECT_0 ? ++count : 0;
+          if (!sem_timedwait(&semaphore, &ts)) {
+            // sem_timedwait returns 0 on success
+            return ++count;
+          } else {
+            return 0;
+          }
         }
 	int try_enter() {return enter_timeout(0);}
 	int check_count() {enter();return leave();}
-	critical_section2();
+	critical_section2()
 	{
-		hMutex = uCreateMutex(0,0,0);
+                sem_init(&semaphore, 0, 1);
 		count=0;
 	}
-	~critical_section2() {CloseHandle(hMutex);}
+	~critical_section2() {sem_destroy(&semaphore);}
 
 	inline void assert_locked() {assert(get_lock_count_check()>0);}
 	inline void assert_not_locked() {assert(get_lock_count_check()==0);}
@@ -614,8 +646,10 @@ private:
 };
 #pragma deprecated(uStringPrintf, uPrintf, uPrintfV)
 
+#ifdef _WINDOWS
 inline LRESULT uButton_SetCheck(HWND wnd,UINT id,bool state) {return uSendDlgItemMessage(wnd,id,BM_SETCHECK,state ? BST_CHECKED : BST_UNCHECKED,0); }
 inline bool uButton_GetCheck(HWND wnd,UINT id) {return uSendDlgItemMessage(wnd,id,BM_GETCHECK,0,0) == BST_CHECKED;}
+#endif
 
 class uCallStackTracker
 {
@@ -651,7 +685,11 @@ namespace pfc {
 
 static int uExceptFilterProc_inline(LPEXCEPTION_POINTERS param) {
 	uDumpCrashInfo(param);
+#if _WINDOWS
 	TerminateProcess(GetCurrentProcess(), 0);
+#else
+        kill(getpid(), SIGKILL);
+#endif
 	return 0;// never reached
 }
 
@@ -747,7 +785,12 @@ struct t_font_description
 {
 	enum
 	{
+#if _WINDOWS
 		m_facename_length = LF_FACESIZE*2,
+#else
+                m_facename_length = 32*2, /* May need to revisit this
+                                             when we pull in freetype? */
+#endif
 		m_height_dpi = 480,
 	};
 
@@ -864,8 +907,13 @@ private:
 
 class LastErrorRevertScope {
 public:
+#ifdef _WINDOWS
 	LastErrorRevertScope() : m_val(GetLastError()) {}
 	~LastErrorRevertScope() {SetLastError(m_val);}
+#else
+	LastErrorRevertScope() {m_val = errno;)
+	~LastErrorRevertScope() {errno = m_val;}        
+#endif
 
 private:
 	const DWORD m_val;
@@ -888,7 +936,16 @@ private:
 class format_hresult {
 public:
 	format_hresult(HRESULT p_code) {
+#if _WINDOWS
 		if (!uFormatSystemErrorMessage(m_buffer,(DWORD)p_code)) m_buffer = "Unknown error code";
+#else
+                /* technical race condition */
+                if (strerror(p_code)) {
+                  m_buffer << strerror(p_code);
+                } else {
+                  m_buffer = "Unknown error code";
+                }
+#endif
 		stamp_hex(p_code);
 	}
 	format_hresult(HRESULT p_code, const char * msgOverride) {
