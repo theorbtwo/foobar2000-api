@@ -972,6 +972,7 @@ public:
 	~uDebugLog() {*this << "\n"; uOutputDebugString(get_ptr());}
 };
 
+#ifdef _WINDOWS
 static void uAddWindowStyle(HWND p_wnd,LONG p_style) {
 	SetWindowLong(p_wnd,GWL_STYLE, GetWindowLong(p_wnd,GWL_STYLE) | p_style);
 }
@@ -1112,5 +1113,7 @@ static void OverrideCrtAbort() {
 	for(size_t i=0; i<_countof(signals); i++) signal(signals[i], _OverrideCrtAbort_handler);
 	_set_abort_behavior(0, ~0);
 }
+
+#endif /* _WINDOWS */
 
 #endif //_SHARED_DLL__SHARED_H_
