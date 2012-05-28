@@ -911,12 +911,12 @@ public:
 	LastErrorRevertScope() : m_val(GetLastError()) {}
 	~LastErrorRevertScope() {SetLastError(m_val);}
 #else
-	LastErrorRevertScope() {m_val = errno;)
+	LastErrorRevertScope() {m_val = errno;}
 	~LastErrorRevertScope() {errno = m_val;}        
 #endif
 
 private:
-	const DWORD m_val;
+	DWORD m_val;
 };
 
 class format_win32_error {
