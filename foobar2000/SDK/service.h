@@ -57,25 +57,25 @@ private:
 	typedef service_ptr_t<T> t_self;
 
 	template<typename t_source> void _init(t_source * in) {
-		m_ptr = in;
-		if (m_ptr) m_ptr->service_add_ref();
+		this.m_ptr = in;
+		if (this.m_ptr) this.m_ptr->service_add_ref();
 	}
 public:
-	service_ptr_t() throw() {m_ptr = NULL;}
+	service_ptr_t() throw() {this.m_ptr = NULL;}
 	service_ptr_t(T * p_ptr) throw() {_init(p_ptr);}
 	service_ptr_t(const t_self & p_source) throw() {_init(p_source.get_ptr());}
 	template<typename t_source> service_ptr_t(t_source * p_ptr) throw() {_init(p_ptr);}
 	template<typename t_source> service_ptr_t(const service_ptr_base_t<t_source> & p_source) throw() {_init(p_source.get_ptr());}
 
-	template<typename t_source> service_ptr_t(const service_nnptr_t<t_source> & p_source) throw() { m_ptr = p_source.get_ptr(); m_ptr->service_add_ref(); }
+	template<typename t_source> service_ptr_t(const service_nnptr_t<t_source> & p_source) throw() { this.m_ptr = p_source.get_ptr(); this.m_ptr->service_add_ref(); }
 
-	~service_ptr_t() throw() {service_release_safe(m_ptr);}
+	~service_ptr_t() throw() {service_release_safe(this.m_ptr);}
 	
 	template<typename t_source>
 	void copy(t_source * p_ptr) throw() {
 		service_add_ref_safe(p_ptr);
-		service_release_safe(m_ptr);
-		m_ptr = pfc::safe_ptr_cast<T>(p_ptr);
+		service_release_safe(this.m_ptr);
+		this.m_ptr = pfc::safe_ptr_cast<T>(p_ptr);
 	}
 
 	template<typename t_source>
@@ -89,30 +89,30 @@ public:
 	template<typename t_source> inline t_self & operator=(t_source * p_ptr) throw() {copy(p_ptr); return *this;}
 
 	template<typename t_source> inline t_self & operator=(const service_nnptr_t<t_source> & p_ptr) throw() {
-		service_release_safe(m_ptr); 
+		service_release_safe(this.m_ptr); 
 		t_source * ptr = p_ptr.get_ptr();
 		ptr->service_add_ref();
-		m_ptr = ptr;
+		this.m_ptr = ptr;
 		return *this;
 	}
 	
 	inline void release() throw() {
-		service_release_safe(m_ptr);
-		m_ptr = NULL;
+		service_release_safe(this.m_ptr);
+		this.m_ptr = NULL;
 	}
 
 
-	inline service_obscure_refcounting<T>* operator->() const throw() {PFC_ASSERT(m_ptr != NULL);return service_obscure_refcounting_cast(m_ptr);}
+	inline service_obscure_refcounting<T>* operator->() const throw() {PFC_ASSERT(this.m_ptr != NULL);return service_obscure_refcounting_cast(this.m_ptr);}
 
-	inline T* get_ptr() const throw() {return m_ptr;}
+	inline T* get_ptr() const throw() {return this.m_ptr;}
 	
-	inline bool is_valid() const throw() {return m_ptr != NULL;}
-	inline bool is_empty() const throw() {return m_ptr == NULL;}
+	inline bool is_valid() const throw() {return this.m_ptr != NULL;}
+	inline bool is_empty() const throw() {return this.m_ptr == NULL;}
 
-	inline bool operator==(const t_self & p_item) const throw() {return m_ptr == p_item.get_ptr();}
-	inline bool operator!=(const t_self & p_item) const throw() {return m_ptr != p_item.get_ptr();}
-	inline bool operator>(const t_self & p_item) const throw() {return m_ptr > p_item.get_ptr();}
-	inline bool operator<(const t_self & p_item) const throw() {return m_ptr < p_item.get_ptr();}
+	inline bool operator==(const t_self & p_item) const throw() {return this.m_ptr == p_item.get_ptr();}
+	inline bool operator!=(const t_self & p_item) const throw() {return this.m_ptr != p_item.get_ptr();}
+	inline bool operator>(const t_self & p_item) const throw() {return this.m_ptr > p_item.get_ptr();}
+	inline bool operator<(const t_self & p_item) const throw() {return this.m_ptr < p_item.get_ptr();}
 
 	template<typename t_other>
 	inline t_self & operator<<(service_ptr_t<t_other> & p_source) throw() {attach(p_source.detach());return *this;}
@@ -121,21 +121,21 @@ public:
 
 
 	inline T* _duplicate_ptr() const throw() {//should not be used ! temporary !
-		service_add_ref_safe(m_ptr);
-		return m_ptr;
+		service_add_ref_safe(this.m_ptr);
+		return this.m_ptr;
 	}
 
 	inline T* detach() throw() {
-		return pfc::replace_null_t(m_ptr);
+		return pfc::replace_null_t(this.m_ptr);
 	}
 
 	template<typename t_source>
 	inline void attach(t_source * p_ptr) throw() {
-		service_release_safe(m_ptr);
-		m_ptr = pfc::safe_ptr_cast<T>(p_ptr);
+		service_release_safe(this.m_ptr);
+		this.m_ptr = pfc::safe_ptr_cast<T>(p_ptr);
 	}
 
-	T & operator*() const throw() {return *m_ptr;}
+	T & operator*() const throw() {return *this.m_ptr;}
 
 	service_ptr_t<service_base> & _as_base_ptr() {
 		PFC_ASSERT( _as_base_ptr_check() );
@@ -155,8 +155,8 @@ private:
 	typedef service_nnptr_t<T> t_self;
 
 	template<typename t_source> void _init(t_source * in) {
-		m_ptr = in;
-		m_ptr->service_add_ref();
+		this.m_ptr = in;
+		this.m_ptr->service_add_ref();
 	}
 	service_nnptr_t() throw() {pfc::crash();}
 public:
@@ -165,13 +165,13 @@ public:
 	template<typename t_source> service_nnptr_t(t_source * p_ptr) throw() {_init(p_ptr);}
 	template<typename t_source> service_nnptr_t(const service_ptr_base_t<t_source> & p_source) throw() {_init(p_source.get_ptr());}
 
-	~service_nnptr_t() throw() {m_ptr->service_release();}
+	~service_nnptr_t() throw() {this.m_ptr->service_release();}
 	
 	template<typename t_source>
 	void copy(t_source * p_ptr) throw() {
 		p_ptr->service_add_ref();
-		m_ptr->service_release();
-		m_ptr = pfc::safe_ptr_cast<T>(p_ptr);
+		this.m_ptr->service_release();
+		this.m_ptr = pfc::safe_ptr_cast<T>(p_ptr);
 	}
 
 	template<typename t_source>
@@ -185,24 +185,24 @@ public:
 	template<typename t_source> inline t_self & operator=(t_source * p_ptr) throw() {copy(p_ptr); return *this;}
 
 
-	inline service_obscure_refcounting<T>* operator->() const throw() {PFC_ASSERT(m_ptr != NULL);return service_obscure_refcounting_cast(m_ptr);}
+	inline service_obscure_refcounting<T>* operator->() const throw() {PFC_ASSERT(this.m_ptr != NULL);return service_obscure_refcounting_cast(this.m_ptr);}
 
-	inline T* get_ptr() const throw() {return m_ptr;}
+	inline T* get_ptr() const throw() {return this.m_ptr;}
 	
 	inline bool is_valid() const throw() {return true;}
 	inline bool is_empty() const throw() {return false;}
 
-	inline bool operator==(const t_self & p_item) const throw() {return m_ptr == p_item.get_ptr();}
-	inline bool operator!=(const t_self & p_item) const throw() {return m_ptr != p_item.get_ptr();}
-	inline bool operator>(const t_self & p_item) const throw() {return m_ptr > p_item.get_ptr();}
-	inline bool operator<(const t_self & p_item) const throw() {return m_ptr < p_item.get_ptr();}
+	inline bool operator==(const t_self & p_item) const throw() {return this.m_ptr == p_item.get_ptr();}
+	inline bool operator!=(const t_self & p_item) const throw() {return this.m_ptr != p_item.get_ptr();}
+	inline bool operator>(const t_self & p_item) const throw() {return this.m_ptr > p_item.get_ptr();}
+	inline bool operator<(const t_self & p_item) const throw() {return this.m_ptr < p_item.get_ptr();}
 
 	inline T* _duplicate_ptr() const throw() {//should not be used ! temporary !
-		service_add_ref_safe(m_ptr);
-		return m_ptr;
+		service_add_ref_safe(this.m_ptr);
+		return this.m_ptr;
 	}
 
-	T & operator*() const throw() {return *m_ptr;}
+	T & operator*() const throw() {return *this.m_ptr;}
 
 	service_ptr_t<service_base> & _as_base_ptr() {
 		PFC_ASSERT( _as_base_ptr_check() );
@@ -488,14 +488,14 @@ private:
 	typedef static_api_ptr_t<t_interface> t_self;
 public:
 	static_api_ptr_t() {
-		standard_api_create_t(m_ptr);
+		standard_api_create_t(this.m_ptr);
 	}
-	service_obscure_refcounting<t_interface>* operator->() const {return service_obscure_refcounting_cast(m_ptr);}
-	t_interface * get_ptr() const {return m_ptr;}
-	~static_api_ptr_t() {m_ptr->service_release();}
+	service_obscure_refcounting<t_interface>* operator->() const {return service_obscure_refcounting_cast(this.m_ptr);}
+	t_interface * get_ptr() const {return this.m_ptr;}
+	~static_api_ptr_t() {this.m_ptr->service_release();}
 	
 	static_api_ptr_t(const t_self & in) {
-		m_ptr = in.m_ptr; m_ptr->service_add_ref();
+		this.m_ptr = in.m_ptr; this.m_ptr->service_add_ref();
 	}
 	const t_self & operator=(const t_self & in) {return *this;} //obsolete, each instance should carry the same pointer
 private:
