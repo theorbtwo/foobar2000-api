@@ -280,7 +280,7 @@ private:
 		stream_reader_formatter<> in(*p_stream, p_abort);
 		t_uint32 count; in >> count;
 		for(t_uint32 walk = 0; walk < count; ++walk) {
-			TMap::t_key key; in >> key; PFC_ASSERT( !this->have_item(key) );
+			typename TMap::t_key key; in >> key; PFC_ASSERT( !this->have_item(key) );
 			try { in >> this->find_or_add( key ); } catch(...) { this->remove(key); throw; }
 		}
 	}

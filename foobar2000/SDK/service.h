@@ -305,7 +305,7 @@ public:
 	template<class T>
 	bool service_query_t(service_ptr_t<T> & p_out)
 	{
-		pfc::assert_same_type<T,T::t_interface>();
+		pfc::assert_same_type<T, typename T::t_interface>();
 		return service_query( *reinterpret_cast<service_ptr_t<service_base>*>(&p_out),T::class_guid);
 	}
 
@@ -324,7 +324,7 @@ typedef service_nnptr_t<service_base> service_nnptr;
 
 template<typename T>
 static void __validate_service_class_helper() {
-	__validate_service_class_helper<T::t_interface_parent>();
+	__validate_service_class_helper<typename T::t_interface_parent>();
 }
 
 template<>
@@ -367,7 +367,7 @@ template<typename B>
 class service_factory_base_t : public service_factory_base {
 public:
 	service_factory_base_t() : service_factory_base(B::class_guid, service_factory_traits<B>::factory_list()) {
-		pfc::assert_same_type<B,B::t_interface_entrypoint>();
+		pfc::assert_same_type<B, typename B::t_interface_entrypoint>();
 	}
 };
 
@@ -384,7 +384,7 @@ template<typename T> static void _validate_service_ptr(service_ptr_t<T> const & 
 #endif
 
 template<class T> static bool service_enum_create_t(service_ptr_t<T> & p_out,t_size p_index) {
-	pfc::assert_same_type<T,T::t_interface_entrypoint>();
+	pfc::assert_same_type<T, typename T::t_interface_entrypoint>();
 	service_ptr_t<service_base> ptr;
 	if (service_factory_base::enum_create(ptr,service_factory_base::enum_find_class(T::class_guid),p_index)) {
 		p_out = static_cast<T*>(ptr.get_ptr());
@@ -396,7 +396,7 @@ template<class T> static bool service_enum_create_t(service_ptr_t<T> & p_out,t_s
 }
 
 template<typename T> static service_class_ref _service_find_class() {
-	pfc::assert_same_type<T,T::t_interface_entrypoint>();
+	pfc::assert_same_type<T, typename T::t_interface_entrypoint>();
 	return service_factory_base::enum_find_class(T::class_guid);
 }
 
@@ -420,7 +420,7 @@ static bool _service_instantiate_helper(service_ptr_t<what> & out, service_class
 template<typename T> class service_class_helper_t {
 public:
 	service_class_helper_t() : m_class(service_factory_base::enum_find_class(T::class_guid)) {
-		pfc::assert_same_type<T,T::t_interface_entrypoint>();
+		pfc::assert_same_type<T, typename T::t_interface_entrypoint>();
 	}
 	t_size get_count() const {
 		return service_factory_base::enum_get_count(m_class);
@@ -443,11 +443,11 @@ private:
 void _standard_api_create_internal(service_ptr & out, const GUID & classID);
 
 template<typename T> static void standard_api_create_t(service_ptr_t<T> & p_out) {
-	if (pfc::is_same_type<T,T::t_interface_entrypoint>::value) {
+	if (pfc::is_same_type<T, typename T::t_interface_entrypoint>::value) {
 		_standard_api_create_internal(p_out._as_base_ptr(), T::class_guid);
 		FB2K_ASSERT_VALID_SERVICE_PTR(p_out);
 	} else {
-		service_ptr_t<T::t_interface_entrypoint> temp;
+		service_ptr_t<typename T::t_interface_entrypoint> temp;
 		standard_api_create_t(temp);
 		if (!temp->service_query_t(p_out)) throw exception_service_extension_not_found();
 	}
@@ -466,7 +466,7 @@ template<typename T> static service_ptr_t<T> standard_api_create_t() {
 
 template<typename T>
 static bool static_api_test_t() {
-	typedef T::t_interface_entrypoint EP;
+	typedef typename T::t_interface_entrypoint EP;
 	service_class_helper_t<EP> helper;
 	if (helper.get_count() != 1) return false;
 	if (!pfc::is_same_type<T,EP>::value) {
