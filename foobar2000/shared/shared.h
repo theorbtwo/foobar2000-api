@@ -960,8 +960,8 @@ private:
 	pfc::string_formatter m_buffer;
 };
 
-struct exception_win32 : public std::exception {
-	exception_win32(DWORD p_code) : std::exception(format_win32_error(p_code)), m_code(p_code) {}
+struct exception_win32 : public pfc::exception_with_message {
+	exception_win32(DWORD p_code) : exception_with_message(format_win32_error(p_code)), m_code(p_code) {}
 	DWORD get_code() const {return m_code;}
 private:
 	DWORD m_code;

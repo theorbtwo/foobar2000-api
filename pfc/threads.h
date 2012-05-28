@@ -12,7 +12,7 @@ namespace pfc {
 	//! IMPORTANT: all classes derived from thread must call waitTillDone() in their destructor, to avoid object destruction during a virtual function call!
 	class thread {
 	public:
-		PFC_DECLARE_EXCEPTION(exception_creation, exception, "Could not create thread");
+		PFC_DECLARE_EXCEPTION(exception_creation, exception_with_message, "Could not create thread");
                 
                 thread() : m_thread(INVALID_HANDLE_VALUE) {}
 

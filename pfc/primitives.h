@@ -15,10 +15,6 @@
 #define TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD(THISCLASS,MEMBER) TEMPLATE_CONSTRUCTOR_FORWARD_FLOOD_WITH_INITIALIZER(THISCLASS,MEMBER,{})
 
 
-#ifdef _MSC_VER
-
-//Bah. I noticed the fact that std::exception carrying a custom message is MS-specific *after* making exception classes a part of ABI. To be nuked next time fb2k component backwards compatibility is axed.
-
 #define PFC_DECLARE_EXCEPTION(NAME,BASECLASS,DEFAULTMSG)	\
 class NAME : public BASECLASS {	\
 public:	\
@@ -35,50 +31,62 @@ namespace pfc {
 	}
 }
 
+#ifdef _MSC_VER
+
+//Bah. I noticed the fact that std::exception carrying a custom message is MS-specific *after* making exception classes a part of ABI. To be nuked next time fb2k component backwards compatibility is axed.
+
+typedef std::exception pfc::exception_with_message;
+
 #else
 
-#define PFC_DECLARE_EXCEPTION(NAME,BASECLASS,DEFAULTMSG)		\
-  class NAME : public BASECLASS {                                       \
-public:									\
-	static const char * g_what() {return DEFAULTMSG;}		\
-	const char* what() const throw() {return m_msg ? m_msg : DEFAULTMSG;} \
-        NAME() {m_msg = NULL;}						\
-	NAME(const char * p_msg) {m_msg = p_msg;}                       \
-	NAME(const char * p_msg,int) {m_msg = p_msg;}                   \
-	NAME(const NAME & p_source) {m_msg = (const char *)p_source.what();} \
-private: \
-	const char *m_msg; \
-};
-
 namespace pfc {
-	template<typename t_base> class __exception_with_message_t : public t_base {
-	private:	typedef __exception_with_message_t<t_base> t_self;
-	public:
-		__exception_with_message_t(const char * p_message) : m_message(NULL) {
-			set_message(p_message);			
-		}
-		__exception_with_message_t() : m_message(NULL) {}
-		__exception_with_message_t(const t_self & p_source) : m_message(NULL) {set_message(p_source.m_message);}
+  /* Intended to be a drop-in replacement for win32's std::exception,
+     which isn't the same as an actual std::exception.
+     - Adds a message field.
+     - Lets you specify a "please don't allocate memory" field -- pass
+       a second value to the constructor, which is an int, the value of
+       which is ignored.
+       - At the moment, the nomem flag is tracked, but ignored.
+  */
+  class exception_with_message : public std::exception {
+  public:
+  exception_with_message(const char * p_message) : m_message(NULL) {
+      set_message(p_message);
+      m_nomem = false;
+    }
 
-		const char* what() const throw() {return m_message != NULL ? m_message : "unnamed exception";}
+  exception_with_message(const char * p_message, int) : m_message(NULL) {
+      set_message(p_message);
+      m_nomem = true;
+    }
 
-		const t_self & operator=(const t_self & p_source) {set_message(p_source.m_message);}
+  exception_with_message(int) : m_message(NULL) {m_nomem = true;}
 
-		~__exception_with_message_t() throw() {cleanup();}
-
-	private:
-		void set_message(const char * p_message) throw() {
-			cleanup();
-			if (p_message != NULL) m_message = strdup(p_message);
-		}
-		void cleanup() throw() {
-			if (m_message != NULL) {free(m_message); m_message = NULL;}
-		}
-		char * m_message;
-	};
-	template<typename t_exception> PFC_NORETURN void throw_exception_with_message(const char * p_message) {
-		throw __exception_with_message_t<t_exception>(p_message);
-	}
+  exception_with_message(const exception_with_message & p_source) : m_message(NULL) {
+      m_nomem = p_source.m_nomem;
+      set_message(p_source.m_message);
+    }
+    
+  const char* what() const throw() {return m_message != NULL ? m_message : "unnamed exception";}
+  
+  const exception_with_message & operator=(const exception_with_message & p_source) {
+    set_message(p_source.m_message);
+    m_nomem = p_source.m_nomem;
+  }
+  
+  ~exception_with_message() throw() {cleanup();}
+  
+  private:
+  void set_message(const char * p_message) throw() {
+    cleanup();
+    if (p_message != NULL) m_message = strdup(p_message);
+  }
+  void cleanup() throw() {
+    if (m_message != NULL) {free(m_message); m_message = NULL;}
+  }
+  char * m_message;
+  bool m_nomem;
+  };
 }
 #endif
 
@@ -195,8 +203,8 @@ namespace pfc {
 
 	typedef std::exception exception;
 
-	PFC_DECLARE_EXCEPTION(exception_overflow,exception,"Overflow");
-	PFC_DECLARE_EXCEPTION(exception_bug_check,exception,"Bug check");
+	PFC_DECLARE_EXCEPTION(exception_overflow,exception_with_message,"Overflow");
+	PFC_DECLARE_EXCEPTION(exception_bug_check,exception_with_message,"Bug check");
 	PFC_DECLARE_EXCEPTION(exception_invalid_params,exception_bug_check,"Invalid parameters");
 	PFC_DECLARE_EXCEPTION(exception_unexpected_recursion,exception_bug_check,"Unexpected recursion");
 	PFC_DECLARE_EXCEPTION(exception_not_implemented,exception_bug_check,"Feature not implemented");

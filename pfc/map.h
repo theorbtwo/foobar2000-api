@@ -2,7 +2,7 @@
 #define _MAP_T_H_INCLUDED_
 
 namespace pfc {
-	PFC_DECLARE_EXCEPTION(exception_map_entry_not_found,exception,"Map entry not found");
+	PFC_DECLARE_EXCEPTION(exception_map_entry_not_found,exception_with_message,"Map entry not found");
 
 	template<typename t_destination> class __map_overwrite_wrapper {
 	public:
