@@ -3,9 +3,9 @@
 
 typedef const void* service_class_ref;
 
-PFC_DECLARE_EXCEPTION(exception_service_not_found,pfc::exception,"Service not found");
-PFC_DECLARE_EXCEPTION(exception_service_extension_not_found,pfc::exception,"Service extension not found");
-PFC_DECLARE_EXCEPTION(exception_service_duplicated,pfc::exception,"Service duplicated");
+PFC_DECLARE_EXCEPTION(exception_service_not_found,pfc::exception_with_message,"Service not found");
+PFC_DECLARE_EXCEPTION(exception_service_extension_not_found,pfc::exception_with_message,"Service extension not found");
+PFC_DECLARE_EXCEPTION(exception_service_duplicated,pfc::exception_with_message,"Service duplicated");
 
 #ifdef _MSC_VER
 #define FOOGUIDDECL __declspec(selectany)
