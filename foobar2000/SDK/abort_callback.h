@@ -8,7 +8,7 @@ PFC_DECLARE_EXCEPTION(exception_aborted,pfc::exception_with_message,"User abort"
 #ifdef _WIN32
 typedef HANDLE abort_callback_event;
 #else
-#error PORTME
+typedef int abort_callback_event;
 #endif
 
 //! This class is used to signal underlying worker code whether user has decided to abort a potentially time-consuming operation. It is commonly required by all file related operations. Code that receives an abort_callback object should periodically check it and abort any operations being performed if it is signaled, typically throwing exception_aborted. \n
@@ -43,26 +43,48 @@ protected:
 
 //! Implementation of abort_callback interface.
 class abort_callback_impl : public abort_callback {
-public:
-	abort_callback_impl() : m_aborting(false) {
-		m_event.create(true,false);
-	}
-	inline void abort() {set_state(true);}
-	inline void reset() {set_state(false);}
-
-	void set_state(bool p_state) {m_aborting = p_state; m_event.set_state(p_state);}
-
-	bool is_aborting() const {return m_aborting;}
-
-	abort_callback_event get_abort_event() const {return m_event.get();}
-
 private:
+#ifdef WIN32
+	win32_event m_event;
+#else
+        // fds[0] is read end, fds[1] is write end.
+        // I wouldn't have packed them like this, but pipe() does.
+        int m_fds[2];
+#endif
+
 	abort_callback_impl(const abort_callback_impl &) {throw pfc::exception_not_implemented();}
 	const abort_callback_impl & operator=(const abort_callback_impl&) {throw pfc::exception_not_implemented();}
 	
 	volatile bool m_aborting;
-#ifdef WIN32
-	win32_event m_event;
+
+public:
+	abort_callback_impl() : m_aborting(false) {
+#if _WINDOWS
+		m_event.create(true,false);
+#else
+                if (pipe(m_fds)) {
+                  throw(exception_win32(errno));
+                }
+#endif
+	}
+	inline void abort() {set_state(true);}
+	inline void reset() {set_state(false);}
+
+	void set_state(bool p_state) {
+          m_aborting = p_state;
+#if _WINDOWS
+          m_event.set_state(p_state);
+#else
+          write(m_fds[1], "1", 1);
+#endif
+        }
+
+	bool is_aborting() const {return m_aborting;}
+
+#if _WINDOWS
+        abort_callback_event get_abort_event() const {return m_event;}
+#else
+	abort_callback_event get_abort_event() const {return m_fds[0];}
 #endif
 };
 
