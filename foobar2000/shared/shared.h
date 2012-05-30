@@ -231,7 +231,11 @@ int SHARED_EXPORT uCharCompare(t_uint32 p_char1,t_uint32 p_char2);
 int SHARED_EXPORT uStringCompare_ConvertNumbers(const char * elem1,const char * elem2);
 HINSTANCE SHARED_EXPORT uLoadLibrary(const char * name);
 HANDLE SHARED_EXPORT uCreateEvent(LPSECURITY_ATTRIBUTES lpEventAttributes,BOOL bManualReset,BOOL bInitialState, const char * lpName);
+#ifdef _WINDOWS
 HANDLE SHARED_EXPORT GetInfiniteWaitEvent();
+#else
+int SHARED_EXPORT GetInfiniteWaitEvent();
+#endif
 DWORD SHARED_EXPORT uGetModuleFileName(HMODULE hMod,pfc::string_base & out);
 BOOL SHARED_EXPORT uSetClipboardString(const char * ptr);
 BOOL SHARED_EXPORT uGetClipboardString(pfc::string_base & out);
