@@ -71,7 +71,7 @@ public:
 #ifdef _WIN32
 	virtual void generate_menu_win32(HMENU p_menu,t_uint32 p_id_base,t_uint32 p_id_count,t_uint32 p_flags) = 0;
 #else
-#error portme
+        virtual void generate_menu_gtk(Gtk::Menu *p_menu,t_uint32 p_id_base,t_uint32 p_id_count,t_uint32 p_flags) = 0;
 #endif
 	//@param p_id Identifier of command to execute, relative to p_id_base of generate_menu_*()
 	//@returns true if command was executed successfully, false if not (e.g. command with given identifier not found).

@@ -2,6 +2,7 @@
 
 CC = gcc
 CFLAGS += -lstdc++ -fexceptions -std=gnu++0x -fpermissive -DUNICODE -I.
+CFLAGS += `pkg-config --cflags gtkmm-3.0`
 
 #CC = clang
 #CFLAGS += -fexceptions -fdiagnostics-fixit-info -std=gnu++0x

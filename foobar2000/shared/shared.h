@@ -16,8 +16,10 @@
 #include <tmschema.h>
 #else /* !WIN32 */
 
-#define TRUE !0
-#define FALSE 0
+#include <errno.h>
+typedef int errno_t;
+
+#include <gtkmm.h>
 
 typedef long* LRESULT;
 typedef bool BOOL;
