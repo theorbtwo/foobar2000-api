@@ -734,6 +734,7 @@ public:
 	//! \deprecated Use playlist_incoming_item_filter_v2::process_locations_async() when possible.
 	virtual bool process_locations(const pfc::list_base_const_t<const char*> & p_urls,pfc::list_base_t<metadb_handle_ptr> & p_out,bool p_filter,const char * p_restrict_mask_override, const char * p_exclude_mask_override,HWND p_parentwnd) = 0;
 	
+#ifdef _WINDOWS
 	//! Converts an IDataObject to a list of metadb_handles.
 	//! Using this function is strongly disrecommended as it implies blocking the drag&drop source app (as well as our app).\n
 	//! @returns True on success, false on user abort or unknown data format.
@@ -758,11 +759,13 @@ public:
 	//! Note: since 0.9.3, it is recommended to use playlist_incoming_item_filter_v2::process_dropped_files_async() instead.
 	//! @returns True on success, false when IDataObject does not contain any of known data formats.
 	virtual bool process_dropped_files_delayed(dropped_files_data & p_out,interface IDataObject * pDataObject) = 0;
+        
+	//! Helper - returns a pfc::com_ptr_t<> rather than a raw pointer.
+	pfc::com_ptr_t<interface IDataObject> create_dataobject_ex(metadb_handle_list_cref data);
+#endif
 
 	//! Helper - calls process_locations() with a single URL. See process_locations() for more info.
 	bool process_location(const char * url,pfc::list_base_t<metadb_handle_ptr> & out,bool filter,const char * p_mask,const char * p_exclude,HWND p_parentwnd);
-	//! Helper - returns a pfc::com_ptr_t<> rather than a raw pointer.
-	pfc::com_ptr_t<interface IDataObject> create_dataobject_ex(metadb_handle_list_cref data);
 
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(playlist_incoming_item_filter);
 };
@@ -800,12 +803,14 @@ public:
 	//! @param p_notify Callback receiving notifications about success/abort of the operation as well as output item list.
 	virtual void process_locations_async(const pfc::list_base_const_t<const char*> & p_urls,t_uint32 p_op_flags,const char * p_restrict_mask_override, const char * p_exclude_mask_override,HWND p_parentwnd,process_locations_notify_ptr p_notify) = 0;
 
+#if _WINDOWS
 	//! Converts an IDataObject to a list of metadb_handles. The function returns immediately; specified callback object receives results when the operation has completed.
 	//! @param p_dataobject IDataObject to process.
 	//! @param p_op_flags Can be null, or one or more of op_flag_* enum values combined, altering behaviors of the operation.
 	//! @param p_parentwnd Parent window for spawned progress dialogs.
 	//! @param p_notify Callback receiving notifications about success/abort of the operation as well as output item list.
 	virtual void process_dropped_files_async(interface IDataObject * p_dataobject,t_uint32 p_op_flags,HWND p_parentwnd,process_locations_notify_ptr p_notify) = 0;
+#endif
 
 	FB2K_MAKE_SERVICE_INTERFACE(playlist_incoming_item_filter_v2,playlist_incoming_item_filter);
 };

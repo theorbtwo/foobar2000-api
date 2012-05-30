@@ -7,13 +7,18 @@
 class NOVTABLE user_interface : public service_base {
 public:
 	//!HookProc usage: \n
-	//! in your windowproc, call HookProc first, and if it returns true, return LRESULT value it passed to you
+	//! in your windowproc, call HookProc first, and if it returns
+	//! true, return LRESULT value it passed to you
+#if _WINDOWS
 	typedef BOOL (WINAPI * HookProc_t)(HWND wnd,UINT msg,WPARAM wp,LPARAM lp,LRESULT * ret);
+#endif
 
 	//! Retrieves name (UTF-8 null-terminated string) of the UI module.
 	virtual const char * get_name()=0;
+#if _WINDOWS
 	//! Initializes the UI module - creates the main app window, etc. Failure should be signaled by appropriate exception (std::exception or a derivative).
 	virtual HWND init(HookProc_t hook)=0;
+#endif
 	//! Deinitializes the UI module - destroys the main app window, etc.
 	virtual void shutdown()=0;
 	//! Activates main app window.
@@ -85,6 +90,7 @@ public:
 //! Implement where needed; use ui_drop_item_callback_factory_t<> template to register, e.g. static ui_drop_item_callback_factory_t<myclass> g_myclass_factory.
 class NOVTABLE ui_drop_item_callback : public service_base {
 public:
+#if _WINDOWS
 	//! Called when an object was dropped; returns true if the object was processed and false if not.
 	virtual bool on_drop(interface IDataObject * pDataObject) = 0;
 	//! Tests whether specified object type is supported by this ui_drop_item_callback implementation. Returns true and sets p_effect when it's supported; returns false otherwise. \n
@@ -95,6 +101,7 @@ public:
 	static bool g_on_drop(interface IDataObject * pDataObject);
 	//! Static helper, calls all existing implementations appropriately. See is_accepted_type().
 	static bool g_is_accepted_type(interface IDataObject * pDataObject, DWORD * p_effect);
+#endif
 
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(ui_drop_item_callback);
 };
