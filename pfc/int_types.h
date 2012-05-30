@@ -8,6 +8,11 @@ typedef int16_t t_int16;
 typedef uint16_t t_uint16;
 typedef int8_t t_int8;
 typedef uint8_t t_uint8;
+
+typedef union tagLARGE_INTEGER {
+  int64_t QuadPart;
+} LARGE_INTEGER;
+
 #else
 typedef __int64 t_int64;
 typedef unsigned __int64 t_uint64;

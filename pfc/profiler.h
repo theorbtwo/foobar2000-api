@@ -2,8 +2,19 @@
 #define _PFC_PROFILER_H_
 
 #ifdef _WINDOWS
-
 #include <intrin.h>
+#else
+
+t_int64 __rdtsc() {
+  struct timespec ts;
+  if (clock_gettime(CLOCK_MONOTONIC, &ts)) {
+    /* throw something! */
+  }
+  return ts.tv_sec*1000000000 + ts.tv_nsec;
+}
+
+#endif
+
 namespace pfc {
 class profiler_static {
 public:
@@ -54,18 +65,29 @@ private:
 		return (double)( p_val - m_start ) / (double) g_query_freq();
 	}
 	static t_uint64 g_query() {
+#if _WINDOWS
 		LARGE_INTEGER val;
 		if (!QueryPerformanceCounter(&val)) throw pfc::exception_not_implemented();
 		return val.QuadPart;
+#else
+                __rdtsc();
+#endif
 	}
 	static t_uint64 g_query_freq() {
+#if _WINDOWS
 		LARGE_INTEGER val;
 		if (!QueryPerformanceFrequency(&val)) throw pfc::exception_not_implemented();
 		return val.QuadPart;
+#else
+                /* Given that we redefined the rdtsc to be in
+                   nanoseconds above... */
+                return 1000000000;
+#endif
 	}
 	t_uint64 m_start;
 };
 
+#if _WINDOWS
 class lores_timer {
 public:
 	void start() {
@@ -92,9 +114,11 @@ private:
 	t_uint64 m_start;
 	mutable t_uint64 m_last_seen;
 };
-}
-#else 
-//PORTME
+#else
+typedef hires_timer lores_timer;
 #endif
 
+}
+
 #endif
+
