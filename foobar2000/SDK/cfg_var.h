@@ -19,7 +19,7 @@ public:
 	//! For internal use only, do not call.
 	static void config_read_file(stream_reader * p_stream,abort_callback & p_abort);
 
-	const GUID m_guid;
+	GUID m_guid;
 private:
 	static cfg_var_reader * g_list;
 	cfg_var_reader * m_next;
@@ -41,7 +41,7 @@ public:
 	//! For internal use only, do not call.
 	static void config_write_file(stream_writer * p_stream,abort_callback & p_abort);
 
-	const GUID m_guid;
+	GUID m_guid;
 private:
 	static cfg_var_writer * g_list;
 	cfg_var_writer * m_next;

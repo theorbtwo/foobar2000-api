@@ -328,7 +328,7 @@ static void __validate_service_class_helper() {
 }
 
 template<>
-static void __validate_service_class_helper<service_base>() {}
+void __validate_service_class_helper<service_base>() {}
 
 
 #include "service_impl.h"

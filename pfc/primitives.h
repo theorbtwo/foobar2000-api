@@ -833,8 +833,8 @@ namespace pfc {
 
 #define PFC_CLASS_NOT_COPYABLE(THISCLASSNAME,THISTYPE) \
 	private:	\
-	THISCLASSNAME(const THISTYPE&) {throw exception_bug_check();}	\
-	const THISTYPE & operator=(const THISTYPE &) {throw exception_bug_check();}
+	THISCLASSNAME(const THISTYPE&) {throw ::pfc::exception_bug_check();} \
+	const THISTYPE & operator=(const THISTYPE &) {throw ::pfc::exception_bug_check();}
 
 #define PFC_CLASS_NOT_COPYABLE_EX(THISTYPE) PFC_CLASS_NOT_COPYABLE(THISTYPE,THISTYPE)
 

@@ -25,14 +25,14 @@ public:
 	//! Calls callback method for every item in the Media Library. Note that order of items in Media Library is undefined.
 	virtual void enum_items(enum_callback & p_callback) = 0;
 	//! Deprecated, does nothing.
-	__declspec(deprecated) virtual void add_items(const pfc::list_base_const_t<metadb_handle_ptr> & p_data) = 0;
+	PFC_DEPRECATE() virtual void add_items(const pfc::list_base_const_t<metadb_handle_ptr> & p_data) = 0;
 	//! Deprecated, does nothing.
-	__declspec(deprecated) virtual void remove_items(const pfc::list_base_const_t<metadb_handle_ptr> & p_data) = 0;
+	PFC_DEPRECATE() virtual void remove_items(const pfc::list_base_const_t<metadb_handle_ptr> & p_data) = 0;
 	//! Deprecated, does nothing.
-	__declspec(deprecated) virtual void add_items_async(const pfc::list_base_const_t<metadb_handle_ptr> & p_data) = 0;
+	PFC_DEPRECATE() virtual void add_items_async(const pfc::list_base_const_t<metadb_handle_ptr> & p_data) = 0;
 	
 	//! Deprecated, does nothing.
-	__declspec(deprecated) virtual void on_files_deleted_sorted(const pfc::list_base_const_t<const char *> & p_data) = 0;
+	PFC_DEPRECATE() virtual void on_files_deleted_sorted(const pfc::list_base_const_t<const char *> & p_data) = 0;
 
 	//! Retrieves the entire Media Library content.
 	virtual void get_all_items(pfc::list_base_t<metadb_handle_ptr> & p_out) = 0;
@@ -46,7 +46,7 @@ public:
 	virtual void rescan() = 0;
 	
 	//! Deprecated, does nothing.
-	__declspec(deprecated) virtual void check_dead_entries(const pfc::list_base_t<metadb_handle_ptr> & p_list) = 0;
+	PFC_DEPRECATE() virtual void check_dead_entries(const pfc::list_base_t<metadb_handle_ptr> & p_list) = 0;
 
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(library_manager);
 };
@@ -55,13 +55,13 @@ public:
 class NOVTABLE library_manager_v2 : public library_manager {
 public:
 	//! Deprecated, always returns false.
-	__declspec(deprecated) virtual bool is_rescan_running() = 0;
+	PFC_DEPRECATE() virtual bool is_rescan_running() = 0;
 
 	//! Deprecated, does nothing and instantly signals completion.
-	__declspec(deprecated) virtual void rescan_async(HWND p_parent,completion_notify_ptr p_notify) = 0;
+	PFC_DEPRECATE() virtual void rescan_async(HWND p_parent,completion_notify_ptr p_notify) = 0;
 
 	//! Deprecated, does nothing and instantly signals completion.
-	__declspec(deprecated) virtual void check_dead_entries_async(const pfc::list_base_const_t<metadb_handle_ptr> & p_list,HWND p_parent,completion_notify_ptr p_notify) = 0;
+	PFC_DEPRECATE() virtual void check_dead_entries_async(const pfc::list_base_const_t<metadb_handle_ptr> & p_list,HWND p_parent,completion_notify_ptr p_notify) = 0;
 
 	FB2K_MAKE_SERVICE_INTERFACE(library_manager_v2,library_manager);
 };

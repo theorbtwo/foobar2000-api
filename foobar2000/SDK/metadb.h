@@ -24,21 +24,21 @@ public:
 	};
 
 	//! No longer used - returns false always.
-	__declspec(deprecated) virtual bool is_busy() = 0;
+	PFC_DEPRECATE() virtual bool is_busy() = 0;
 	//! No longer used - returns false always.
-	__declspec(deprecated) virtual bool is_updating_disabled() = 0;
+	PFC_DEPRECATE() virtual bool is_updating_disabled() = 0;
 	//! No longer used - returns false always.
-	__declspec(deprecated) virtual bool is_file_updating_blocked() = 0;
+	PFC_DEPRECATE() virtual bool is_file_updating_blocked() = 0;
 	//! No longer used.
-	__declspec(deprecated) virtual void highlight_running_process() = 0;
+	PFC_DEPRECATE() virtual void highlight_running_process() = 0;
 	//! Loads tags from multiple items. Use the async version in metadb_io_v2 instead if possible.
-	__declspec(deprecated) virtual t_load_info_state load_info_multi(metadb_handle_list_cref p_list,t_load_info_type p_type,HWND p_parent_window,bool p_show_errors) = 0;
+	PFC_DEPRECATE() virtual t_load_info_state load_info_multi(metadb_handle_list_cref p_list,t_load_info_type p_type,HWND p_parent_window,bool p_show_errors) = 0;
 	//! Updates tags on multiple items. Use the async version in metadb_io_v2 instead if possible.
-	__declspec(deprecated) virtual t_update_info_state update_info_multi(metadb_handle_list_cref p_list,const pfc::list_base_const_t<file_info*> & p_new_info,HWND p_parent_window,bool p_show_errors) = 0;
+	PFC_DEPRECATE() virtual t_update_info_state update_info_multi(metadb_handle_list_cref p_list,const pfc::list_base_const_t<file_info*> & p_new_info,HWND p_parent_window,bool p_show_errors) = 0;
 	//! Rewrites tags on multiple items. Use the async version in metadb_io_v2 instead if possible.
-	__declspec(deprecated) virtual t_update_info_state rewrite_info_multi(metadb_handle_list_cref p_list,HWND p_parent_window,bool p_show_errors) = 0;
+	PFC_DEPRECATE() virtual t_update_info_state rewrite_info_multi(metadb_handle_list_cref p_list,HWND p_parent_window,bool p_show_errors) = 0;
 	//! Removes tags from multiple items. Use the async version in metadb_io_v2 instead if possible.
-	__declspec(deprecated) virtual t_update_info_state remove_info_multi(metadb_handle_list_cref p_list,HWND p_parent_window,bool p_show_errors) = 0;
+	PFC_DEPRECATE() virtual t_update_info_state remove_info_multi(metadb_handle_list_cref p_list,HWND p_parent_window,bool p_show_errors) = 0;
 
 	virtual void hint_multi(metadb_handle_list_cref p_list,const pfc::list_base_const_t<const file_info*> & p_infos,const pfc::list_base_const_t<t_filestats> & p_stats,const bit_array & p_fresh_mask) = 0;
 
@@ -56,8 +56,8 @@ public:
 
 	void hint_async(metadb_handle_ptr p_item,const file_info & p_info,const t_filestats & p_stats,bool p_fresh);
 
-	__declspec(deprecated) t_load_info_state load_info(metadb_handle_ptr p_item,t_load_info_type p_type,HWND p_parent_window,bool p_show_errors);
-	__declspec(deprecated) t_update_info_state update_info(metadb_handle_ptr p_item,file_info & p_info,HWND p_parent_window,bool p_show_errors);
+	PFC_DEPRECATE() t_load_info_state load_info(metadb_handle_ptr p_item,t_load_info_type p_type,HWND p_parent_window,bool p_show_errors);
+	PFC_DEPRECATE() t_update_info_state update_info(metadb_handle_ptr p_item,file_info & p_info,HWND p_parent_window,bool p_show_errors);
 	
 	FB2K_MAKE_SERVICE_INTERFACE_ENTRYPOINT(metadb_io);
 };
