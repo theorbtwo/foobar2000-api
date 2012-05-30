@@ -129,6 +129,48 @@ typedef wchar_t TCHAR;
 #include <semaphore.h>
 typedef sem_t CRITICAL_SECTION;
 
+/* stdlib-like bits */
+
+/* http://msdn.microsoft.com/en-us/library/5dae5d43(VS.80).aspx */
+errno_t strncpy_s(
+                  char *strDest,
+                  size_t numberOfElements,
+                  const char *strSource,
+                  size_t count
+                  ) {
+  if (strDest == NULL)
+    return EINVAL;
+  if (strSource == NULL)
+    return EINVAL;
+  if (numberOfElements == 0)
+    return EINVAL;
+
+  int strlen = 0;
+  while (strlen < count && strSource[strlen] != 0) {
+    strlen++;
+    if (strlen > count) {
+      strDest[0] = 0;
+      return EINVAL;
+    }
+    strDest[strlen] = strSource[strlen];
+  }
+
+  strDest[strlen+1] = 0;
+
+  return 0;
+}
+
+template<size_t numberOfElements>
+errno_t strncpy_s(
+                  char strDest[numberOfElements],
+                  const char *strSource,
+                  size_t count
+                  ) {
+  strncpy_s(strDest, numberOfElements, strSource, count);
+}
+
+
+
 #endif
 
 #ifndef NOTHROW
