@@ -3,7 +3,7 @@
 
 namespace foobar2000_io {
 
-PFC_DECLARE_EXCEPTION(exception_aborted,pfc::exception,"User abort");
+PFC_DECLARE_EXCEPTION(exception_aborted,pfc::exception_with_message,"User abort");
 
 #ifdef _WIN32
 typedef HANDLE abort_callback_event;

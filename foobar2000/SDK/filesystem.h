@@ -18,7 +18,7 @@ namespace foobar2000_io
 	static const t_filetimestamp filetimestamp_1second_increment = 10000000;
 
 	//! Generic I/O error. Root class for I/O failure exception. See relevant default message for description of each derived exception class.
-	PFC_DECLARE_EXCEPTION(exception_io,						pfc::exception,"I/O error");
+	PFC_DECLARE_EXCEPTION(exception_io,						pfc::exception_with_message,"I/O error");
 	//! Object not found.
 	PFC_DECLARE_EXCEPTION(exception_io_not_found,			exception_io,"Object not found");
 	//! Access denied.
