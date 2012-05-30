@@ -1020,6 +1020,8 @@ public:
 	~uDebugLog() {*this << "\n"; uOutputDebugString(get_ptr());}
 };
 
+#include "audio_math.h"
+
 #ifdef _WINDOWS
 static void uAddWindowStyle(HWND p_wnd,LONG p_style) {
 	SetWindowLong(p_wnd,GWL_STYLE, GetWindowLong(p_wnd,GWL_STYLE) | p_style);
@@ -1133,7 +1135,6 @@ static bool IsWindowChildOf(HWND child, HWND parent) {
 }
 
 
-#include "audio_math.h"
 #include "win32_misc.h"
 
 template<typename TPtr>
