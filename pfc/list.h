@@ -579,7 +579,7 @@ protected:
 	typedef const list_base_const_t<t_item> t_self_const;
 public:
 	template<typename t_in> t_self & operator=(t_in const & source) {
-          remove_all();
+          this.remove_all();
           add_items(source);
           return *this;
         }
@@ -594,7 +594,7 @@ protected:
 	typedef list_base_t<t_item> t_self;
 	typedef const list_base_const_t<t_item> t_self_const;
 public:
-	template<typename t_in> t_self & operator=(t_in const & source) {remove_all(); add_items(source); return *this;}
+	template<typename t_in> t_self & operator=(t_in const & source) {this.remove_all(); add_items(source); return *this;}
 	template<typename t_in> t_self & operator+=(t_in const & p_source) {add_item(p_source); return *this;}
 	template<typename t_in> t_self & operator|=(t_in const & p_source) {add_items(p_source); return *this;}
 };

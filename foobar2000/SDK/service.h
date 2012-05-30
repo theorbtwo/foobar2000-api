@@ -57,8 +57,8 @@ private:
 	typedef service_ptr_t<T> t_self;
 
 	template<typename t_source> void _init(t_source * in) {
-		this.m_ptr = in;
-		if (this.m_ptr) this.m_ptr->service_add_ref();
+		this->m_ptr = in;
+		if (this->m_ptr) this->m_ptr->service_add_ref();
 	}
 public:
 	service_ptr_t() throw() {this.m_ptr = NULL;}
